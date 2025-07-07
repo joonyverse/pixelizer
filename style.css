@@ -8,12 +8,27 @@ body {
     background-color: #1a1a1a;
     font-family: 'Arial', sans-serif;
     color: white;
+    /* 모바일에서 스크롤바 숨기기 */
+    -webkit-overflow-scrolling: touch;
+    overflow-x: hidden;
+    /* 모바일 성능 최적화 */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* 터치 하이라이트 제거 */
+    -webkit-tap-highlight-color: transparent;
+    /* 사용자 선택 방지 */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 .container {
     display: flex;
     flex-direction: column;
     height: 100vh;
+    /* 모바일에서 안전 영역 고려 */
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
 .upload-section {
@@ -23,6 +38,9 @@ body {
     padding: 20px;
     background-color: #2a2a2a;
     border-bottom: 1px solid #444;
+    /* 모바일에서 스크롤 가능하도록 */
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .upload-btn {
@@ -36,11 +54,19 @@ body {
     font-weight: 600;
     transition: all 0.3s ease;
     box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    /* 모바일에서 터치 영역 확대 */
+    min-height: 44px;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .upload-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.upload-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
 }
 
 .paste-btn {
@@ -54,6 +80,9 @@ body {
     font-weight: 600;
     transition: all 0.3s ease;
     box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+    /* 모바일에서 터치 영역 확대 */
+    min-height: 44px;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .paste-btn:hover {
@@ -61,9 +90,16 @@ body {
     box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
 }
 
+.paste-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 10px rgba(255, 107, 107, 0.3);
+}
+
 .mode-buttons {
     display: flex;
     gap: 10px;
+    /* 모바일에서 스크롤 가능하도록 */
+    flex-shrink: 0;
 }
 
 .mode-btn {
@@ -75,10 +111,18 @@ body {
     cursor: pointer;
     font-size: 14px;
     transition: all 0.3s ease;
+    /* 모바일에서 터치 영역 확대 */
+    min-height: 44px;
+    min-width: 60px;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .mode-btn:hover {
     background-color: #555;
+}
+
+.mode-btn:active {
+    background-color: #666;
 }
 
 .mode-btn.active {
@@ -89,6 +133,8 @@ body {
 .grid-mode-buttons {
     display: flex;
     gap: 10px;
+    /* 모바일에서 스크롤 가능하도록 */
+    flex-shrink: 0;
 }
 
 .grid-mode-btn {
@@ -100,10 +146,18 @@ body {
     cursor: pointer;
     font-size: 14px;
     transition: all 0.3s ease;
+    /* 모바일에서 터치 영역 확대 */
+    min-height: 44px;
+    min-width: 60px;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .grid-mode-btn:hover {
     background-color: #555;
+}
+
+.grid-mode-btn:active {
+    background-color: #666;
 }
 
 .grid-mode-btn.active {
@@ -114,6 +168,8 @@ body {
 .export-section {
     position: relative;
     display: inline-block;
+    /* 모바일에서 스크롤 가능하도록 */
+    flex-shrink: 0;
 }
 
 .export-btn {
@@ -127,11 +183,19 @@ body {
     font-weight: 600;
     transition: all 0.3s ease;
     box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+    /* 모바일에서 터치 영역 확대 */
+    min-height: 44px;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .export-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+}
+
+.export-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 10px rgba(76, 175, 80, 0.3);
 }
 
 .export-dropdown {
@@ -167,10 +231,17 @@ body {
     cursor: pointer;
     font-size: 14px;
     transition: background-color 0.2s ease;
+    /* 모바일에서 터치 영역 확대 */
+    min-height: 44px;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .export-option:hover {
     background-color: #444;
+}
+
+.export-option:active {
+    background-color: #555;
 }
 
 .export-option:first-child {
@@ -190,11 +261,29 @@ body {
     background-color: #000;
     border-radius: 8px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    /* 모바일에서 터치 이벤트 지원 */
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    /* 모바일 성능 최적화 */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    /* 터치 하이라이트 제거 */
+    -webkit-tap-highlight-color: transparent;
 }
 
 /* dat.gui 스타일 조정 */
 .dg.ac {
     z-index: 1000;
+}
+
+/* 모바일에서 dat.gui 숨기기 */
+@media (max-width: 768px) {
+    .dg.ac {
+        display: none !important;
+    }
 }
 
 /* 반응형 디자인 */
@@ -203,25 +292,95 @@ body {
         flex-direction: column;
         gap: 15px;
         padding: 15px;
+        /* 모바일에서 세로 스크롤 */
+        overflow-y: auto;
+        overflow-x: hidden;
+        max-height: 40vh;
     }
     
     .mode-buttons, .grid-mode-buttons {
         width: 100%;
         justify-content: center;
+        flex-wrap: wrap;
     }
     
     .upload-btn, .paste-btn, .export-btn {
         width: 100%;
         max-width: 300px;
+        font-size: 18px;
+        padding: 15px 24px;
+    }
+    
+    .mode-btn, .grid-mode-btn {
+        font-size: 16px;
+        padding: 12px 16px;
+        min-width: 80px;
     }
     
     .export-dropdown {
         left: 50%;
         transform: translateX(-50%) translateY(-10px);
+        min-width: 250px;
     }
     
     .export-dropdown.show {
         transform: translateX(-50%) translateY(0);
+    }
+    
+    .export-option {
+        font-size: 16px;
+        padding: 15px 20px;
+    }
+    
+    #canvas {
+        max-height: calc(60vh - 20px);
+        margin: 10px;
+    }
+}
+
+/* 작은 모바일 화면 (480px 이하) */
+@media (max-width: 480px) {
+    .upload-section {
+        padding: 10px;
+        gap: 10px;
+    }
+    
+    .upload-btn, .paste-btn, .export-btn {
+        font-size: 16px;
+        padding: 12px 20px;
+    }
+    
+    .mode-btn, .grid-mode-btn {
+        font-size: 14px;
+        padding: 10px 12px;
+        min-width: 70px;
+    }
+    
+    .export-option {
+        font-size: 14px;
+        padding: 12px 16px;
+    }
+}
+
+/* 터치 디바이스 최적화 */
+@media (hover: none) and (pointer: coarse) {
+    .upload-btn:hover,
+    .paste-btn:hover,
+    .export-btn:hover,
+    .mode-btn:hover,
+    .grid-mode-btn:hover,
+    .export-option:hover {
+        transform: none;
+        box-shadow: none;
+    }
+    
+    .upload-btn:active,
+    .paste-btn:active,
+    .export-btn:active,
+    .mode-btn:active,
+    .grid-mode-btn:active,
+    .export-option:active {
+        transform: scale(0.95);
     }
 }
 
@@ -238,6 +397,9 @@ body {
     transition: transform 0.3s ease;
     z-index: 10000;
     font-weight: 600;
+    /* 모바일에서 안전 영역 고려 */
+    bottom: max(20px, env(safe-area-inset-bottom) + 10px);
+    right: max(20px, env(safe-area-inset-right) + 10px);
 }
 
 .toast.show {
@@ -250,4 +412,151 @@ body {
 
 .toast.error {
     background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+}
+
+/* 모바일 전용 컨트롤 패널 */
+.mobile-controls {
+    display: none;
+    background-color: #2a2a2a;
+    border-bottom: 1px solid #444;
+    padding: 15px;
+    gap: 15px;
+}
+
+/* 데스크톱 컨트롤 */
+.desktop-controls {
+    display: flex;
+}
+
+.mobile-control-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.mobile-control-row:last-child {
+    justify-content: center;
+}
+
+.mobile-btn {
+    padding: 12px 16px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    min-height: 44px;
+    min-width: 80px;
+    -webkit-tap-highlight-color: transparent;
+    flex: 1;
+    max-width: 120px;
+}
+
+.mobile-btn.help {
+    max-width: 200px;
+    flex: none;
+}
+
+.mobile-btn:active {
+    transform: scale(0.95);
+}
+
+.mobile-btn.export {
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+}
+
+.mobile-btn.help {
+    background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+}
+
+.mobile-btn.upload {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.mobile-btn.paste {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+}
+
+.mobile-slider-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    max-width: 300px;
+}
+
+.mobile-slider-container label {
+    font-size: 14px;
+    font-weight: 600;
+    color: white;
+    min-width: 80px;
+}
+
+.mobile-slider {
+    flex: 1;
+    height: 6px;
+    border-radius: 3px;
+    background: #444;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.mobile-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.mobile-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.mobile-slider-container span {
+    font-size: 14px;
+    font-weight: 600;
+    color: white;
+    min-width: 30px;
+    text-align: center;
+}
+
+/* 모바일에서 토스트 위치 조정 */
+@media (max-width: 768px) {
+    /* 데스크톱 컨트롤 숨기기 */
+    .desktop-controls {
+        display: none !important;
+    }
+    
+    /* 모바일 컨트롤 표시 */
+    .mobile-controls {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .toast {
+        left: 20px;
+        right: 20px;
+        transform: translateY(100px);
+        text-align: center;
+    }
+    
+    .toast.show {
+        transform: translateY(0);
+    }
 } 

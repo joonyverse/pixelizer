@@ -21,6 +21,18 @@ class ImagePixelizer {
         this.downloadLink = document.getElementById('downloadLink');
         this.toast = document.getElementById('toast');
         
+        // 모바일 UI 요소들
+        this.mobileControls = document.getElementById('mobileControls');
+        this.mobileUploadBtn = document.getElementById('mobileUploadBtn');
+        this.mobilePasteBtn = document.getElementById('mobilePasteBtn');
+        this.mobileModeBtn = document.getElementById('mobileModeBtn');
+        this.mobileGridBtn = document.getElementById('mobileGridBtn');
+        this.mobileEffectBtn = document.getElementById('mobileEffectBtn');
+        this.mobilePixelSlider = document.getElementById('mobilePixelSlider');
+        this.mobilePixelValue = document.getElementById('mobilePixelValue');
+        this.mobileExportBtn = document.getElementById('mobileExportBtn');
+        this.mobileHelpBtn = document.getElementById('mobileHelpBtn');
+        
         // 설정 객체
         this.settings = {
             pixelSize: 32,
@@ -128,6 +140,253 @@ class ImagePixelizer {
                 this.showPlaceholder();
             }
         });
+        
+        // 모바일 터치 이벤트 지원
+        this.setupTouchEvents();
+        
+        // 모바일에서 화면 방향 변경 감지
+        window.addEventListener('orientationchange', () => {
+            setTimeout(() => {
+                this.resizeCanvas();
+                if (this.imageLoaded) {
+                    this.renderImage();
+                } else {
+                    this.showPlaceholder();
+                }
+            }, 100);
+        });
+        
+        // 모바일 컨트롤 패널 이벤트 리스너
+        this.setupMobileControls();
+    }
+    
+    setupMobileControls() {
+        // 모바일 업로드 버튼
+        this.mobileUploadBtn.addEventListener('click', () => {
+            this.imageInput.click();
+        });
+        
+        // 모바일 붙여넣기 버튼
+        this.mobilePasteBtn.addEventListener('click', () => {
+            this.pasteFromClipboard();
+        });
+        
+        // 모바일 모드 전환 버튼
+        this.mobileModeBtn.addEventListener('click', () => {
+            this.toggleMode();
+        });
+        
+        // 모바일 그리드 모드 버튼
+        this.mobileGridBtn.addEventListener('click', () => {
+            this.cycleGridMode();
+        });
+        
+        // 모바일 효과 변경 버튼
+        this.mobileEffectBtn.addEventListener('click', () => {
+            this.cycleImageEffect();
+        });
+        
+        // 모바일 픽셀 크기 슬라이더
+        this.mobilePixelSlider.addEventListener('input', (e) => {
+            const value = parseInt(e.target.value);
+            this.settings.pixelSize = value;
+            this.mobilePixelValue.textContent = value;
+            
+            if (this.imageLoaded && this.currentMode === 'pixel') {
+                this.renderImage();
+            }
+        });
+        
+        // 모바일 내보내기 버튼
+        this.mobileExportBtn.addEventListener('click', () => {
+            this.showMobileExportOptions();
+        });
+        
+        // 모바일 도움말 버튼
+        this.mobileHelpBtn.addEventListener('click', () => {
+            this.showMobileHelp();
+        });
+        
+        // 초기 슬라이더 값 설정
+        this.mobilePixelSlider.value = this.settings.pixelSize;
+        this.mobilePixelValue.textContent = this.settings.pixelSize;
+    }
+    
+    showMobileExportOptions() {
+        const options = [
+            { format: 'png', label: 'PNG로 저장' },
+            { format: 'jpeg', label: 'JPEG로 저장' },
+            { format: 'webp', label: 'WebP로 저장' },
+            { format: 'svg', label: 'SVG로 저장' }
+        ];
+        
+        const message = options.map(option => 
+            `${option.label}`
+        ).join('\n');
+        
+        if (confirm('내보내기 형식을 선택하세요:\n\n' + message + '\n\n확인을 누르면 PNG로 저장됩니다.')) {
+            this.exportImage('png');
+        }
+    }
+    
+    showMobileHelp() {
+        const helpText = `
+📱 모바일 사용법:
+
+👆 터치 제스처:
+• 더블 탭: 원본/픽셀 모드 전환
+• 왼쪽 스와이프: 그리드 모드 변경
+• 오른쪽 스와이프: 이미지 효과 변경
+
+🎛️ 컨트롤 패널:
+• 원본/픽셀: 모드 전환
+• 그리드 모드: 그리드 스타일 변경
+• 효과 변경: 밝기/대비/채도 조정
+• 픽셀 크기: 슬라이더로 조정
+• 내보내기: 이미지 저장
+• 도움말: 이 메시지 표시
+
+📸 이미지 업로드:
+• "이미지 업로드" 버튼 사용
+• 또는 클립보드에서 붙여넣기
+        `;
+        
+        alert(helpText);
+    }
+    
+    setupTouchEvents() {
+        // 터치 제스처 변수들
+        this.touchStartX = 0;
+        this.touchStartY = 0;
+        this.touchEndX = 0;
+        this.touchEndY = 0;
+        this.lastTouchTime = 0;
+        this.touchCount = 0;
+        
+        // 캔버스 터치 이벤트
+        this.canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            this.handleTouchStart(e);
+        }, { passive: false });
+        
+        this.canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            this.handleTouchMove(e);
+        }, { passive: false });
+        
+        this.canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            this.handleTouchEnd(e);
+        }, { passive: false });
+        
+        // 모바일에서 더블 탭으로 모드 전환
+        this.canvas.addEventListener('touchend', (e) => {
+            const currentTime = new Date().getTime();
+            const timeDiff = currentTime - this.lastTouchTime;
+            
+            if (timeDiff < 300 && timeDiff > 0) {
+                // 더블 탭 감지
+                this.toggleMode();
+            }
+            
+            this.lastTouchTime = currentTime;
+        });
+        
+        // 모바일에서 스와이프 제스처
+        let startX = 0;
+        let startY = 0;
+        
+        this.canvas.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+        });
+        
+        this.canvas.addEventListener('touchend', (e) => {
+            if (!startX || !startY) return;
+            
+            const endX = e.changedTouches[0].clientX;
+            const endY = e.changedTouches[0].clientY;
+            
+            const diffX = startX - endX;
+            const diffY = startY - endY;
+            
+            // 수평 스와이프 감지 (최소 50px)
+            if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+                if (diffX > 0) {
+                    // 왼쪽 스와이프 - 그리드 모드 변경
+                    this.cycleGridMode();
+                } else {
+                    // 오른쪽 스와이프 - 이미지 효과 조정
+                    this.cycleImageEffect();
+                }
+            }
+            
+            startX = 0;
+            startY = 0;
+        });
+    }
+    
+    handleTouchStart(e) {
+        this.touchStartX = e.touches[0].clientX;
+        this.touchStartY = e.touches[0].clientY;
+    }
+    
+    handleTouchMove(e) {
+        // 터치 이동 중 스크롤 방지
+        e.preventDefault();
+    }
+    
+    handleTouchEnd(e) {
+        this.touchEndX = e.changedTouches[0].clientX;
+        this.touchEndY = e.changedTouches[0].clientY;
+    }
+    
+    toggleMode() {
+        if (this.currentMode === 'original') {
+            this.setMode('pixel');
+        } else {
+            this.setMode('original');
+        }
+    }
+    
+    cycleGridMode() {
+        const modes = ['none', 'grid', 'dot'];
+        const currentIndex = modes.indexOf(this.currentGridMode);
+        const nextIndex = (currentIndex + 1) % modes.length;
+        this.setGridMode(modes[nextIndex]);
+    }
+    
+    cycleImageEffect() {
+        // 이미지 효과 순환 (밝기, 대비, 채도)
+        const effects = [
+            { brightness: 1.0, contrast: 1.0, saturation: 1.0 },
+            { brightness: 1.2, contrast: 1.1, saturation: 1.0 },
+            { brightness: 0.8, contrast: 1.2, saturation: 1.1 },
+            { brightness: 1.1, contrast: 0.9, saturation: 1.2 }
+        ];
+        
+        const currentEffect = `${this.settings.brightness}-${this.settings.contrast}-${this.settings.saturation}`;
+        let nextIndex = 0;
+        
+        for (let i = 0; i < effects.length; i++) {
+            const effect = effects[i];
+            const effectString = `${effect.brightness}-${effect.contrast}-${effect.saturation}`;
+            if (effectString === currentEffect) {
+                nextIndex = (i + 1) % effects.length;
+                break;
+            }
+        }
+        
+        const nextEffect = effects[nextIndex];
+        this.settings.brightness = nextEffect.brightness;
+        this.settings.contrast = nextEffect.contrast;
+        this.settings.saturation = nextEffect.saturation;
+        
+        if (this.imageLoaded) {
+            this.renderImage();
+        }
+        
+        this.showMessage(`이미지 효과 변경: 밝기 ${nextEffect.brightness}, 대비 ${nextEffect.contrast}, 채도 ${nextEffect.saturation}`);
     }
     
     setupGUI() {
@@ -299,10 +558,19 @@ class ImagePixelizer {
         this.originalBtn.classList.toggle('active', mode === 'original');
         this.pixelBtn.classList.toggle('active', mode === 'pixel');
         
+        // 모바일 버튼 텍스트 업데이트
+        if (this.mobileModeBtn) {
+            this.mobileModeBtn.textContent = mode === 'original' ? '픽셀화' : '원본';
+        }
+        
         // 이미지 렌더링
         if (this.imageLoaded) {
             this.renderImage();
         }
+        
+        // 모드 변경 메시지
+        const modeText = mode === 'original' ? '원본' : '픽셀화';
+        this.showMessage(`${modeText} 모드로 변경되었습니다.`);
     }
 
     setGridMode(mode) {
@@ -312,11 +580,25 @@ class ImagePixelizer {
         this.noGridBtn.classList.toggle('active', mode === 'none');
         this.gridBtn.classList.toggle('active', mode === 'grid');
         this.dotBtn.classList.toggle('active', mode === 'dot');
+        
+        // 모바일 버튼 텍스트 업데이트
+        if (this.mobileGridBtn) {
+            const modeTexts = {
+                'none': '그리드 없음',
+                'grid': '그리드',
+                'dot': '도트'
+            };
+            this.mobileGridBtn.textContent = modeTexts[mode] || '그리드 모드';
+        }
 
         // 이미지 렌더링
         if (this.imageLoaded) {
             this.renderImage();
         }
+        
+        // 그리드 모드 변경 메시지
+        const modeText = mode === 'none' ? '그리드 없음' : mode === 'grid' ? '그리드' : '도트';
+        this.showMessage(`${modeText} 모드로 변경되었습니다.`);
     }
     
     resizeCanvas() {

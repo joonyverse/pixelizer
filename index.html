@@ -2,14 +2,20 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#1a1a1a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="픽셀화 도구">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="description" content="이미지를 픽셀화하고 다양한 효과를 적용할 수 있는 도구입니다.">
     <title>이미지 픽셀화 도구</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.9/dat.gui.min.js"></script>
 </head>
 <body>
     <div class="container">
-        <div class="upload-section">
+        <div class="upload-section desktop-controls">
             <input type="file" id="imageInput" accept="image/*" style="display: none;">
             <button id="uploadBtn" class="upload-btn">이미지 업로드</button>
             <button id="pasteBtn" class="paste-btn">클립보드 붙여넣기</button>
@@ -30,6 +36,30 @@
                     <button class="export-option" data-format="webp">WebP로 저장</button>
                     <button class="export-option" data-format="svg">SVG로 저장</button>
                 </div>
+            </div>
+        </div>
+        
+        <!-- 모바일 전용 컨트롤 패널 -->
+        <div class="mobile-controls" id="mobileControls">
+            <div class="mobile-control-row">
+                <button id="mobileUploadBtn" class="mobile-btn upload">📷 업로드</button>
+                <button id="mobilePasteBtn" class="mobile-btn paste">📋 붙여넣기</button>
+                <button id="mobileModeBtn" class="mobile-btn">원본/픽셀</button>
+            </div>
+            <div class="mobile-control-row">
+                <button id="mobileGridBtn" class="mobile-btn">그리드 모드</button>
+                <button id="mobileEffectBtn" class="mobile-btn">효과 변경</button>
+                <button id="mobileExportBtn" class="mobile-btn export">💾 저장</button>
+            </div>
+            <div class="mobile-control-row">
+                <div class="mobile-slider-container">
+                    <label for="mobilePixelSlider">픽셀 크기</label>
+                    <input type="range" id="mobilePixelSlider" min="1" max="64" value="32" class="mobile-slider">
+                    <span id="mobilePixelValue">32</span>
+                </div>
+            </div>
+            <div class="mobile-control-row">
+                <button id="mobileHelpBtn" class="mobile-btn help">❓ 도움말</button>
             </div>
         </div>
         <canvas id="canvas"></canvas>
