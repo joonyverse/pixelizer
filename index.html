@@ -19,6 +19,7 @@
             <input type="file" id="imageInput" accept="image/*" style="display: none;">
             <button id="uploadBtn" class="upload-btn">이미지 업로드</button>
             <button id="pasteBtn" class="paste-btn">클립보드 붙여넣기</button>
+            <button id="historyBtn" class="history-btn">이미지 목록</button>
             <div class="mode-buttons">
                 <button id="originalBtn" class="mode-btn active">원본</button>
                 <button id="pixelBtn" class="mode-btn">픽셀화</button>
@@ -39,11 +40,29 @@
             </div>
         </div>
         
+        <!-- 이미지 목록 패널 -->
+        <div class="image-history-panel" id="imageHistoryPanel">
+            <div class="history-header">
+                <h3>이미지 목록</h3>
+                <button id="closeHistoryBtn" class="close-btn">×</button>
+            </div>
+            <div class="history-content">
+                <div class="history-stats">
+                    <span id="imageCount">0개의 이미지</span>
+                    <button id="clearAllBtn" class="clear-all-btn">모두 삭제</button>
+                </div>
+                <div class="history-list" id="historyList">
+                    <!-- 이미지 목록이 여기에 동적으로 추가됩니다 -->
+                </div>
+            </div>
+        </div>
+        
         <!-- 모바일 전용 컨트롤 패널 -->
         <div class="mobile-controls" id="mobileControls">
             <div class="mobile-control-row">
                 <button id="mobileUploadBtn" class="mobile-btn upload">📷 업로드</button>
                 <button id="mobilePasteBtn" class="mobile-btn paste">📋 붙여넣기</button>
+                <button id="mobileHistoryBtn" class="mobile-btn history">📋 목록</button>
                 <button id="mobileModeBtn" class="mobile-btn">원본/픽셀</button>
             </div>
             <div class="mobile-control-row">
