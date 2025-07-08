@@ -11,6 +11,7 @@ class ImagePixelizer {
         this.uploadBtn = document.getElementById('uploadBtn');
         this.imageInput = document.getElementById('imageInput');
         this.pasteBtn = document.getElementById('pasteBtn');
+        this.historyBtn = document.getElementById('historyBtn');
         this.originalBtn = document.getElementById('originalBtn');
         this.pixelBtn = document.getElementById('pixelBtn');
         this.noGridBtn = document.getElementById('noGridBtn');
@@ -21,10 +22,18 @@ class ImagePixelizer {
         this.downloadLink = document.getElementById('downloadLink');
         this.toast = document.getElementById('toast');
         
+        // 이미지 목록 패널 UI 요소들
+        this.imageHistoryPanel = document.getElementById('imageHistoryPanel');
+        this.closeHistoryBtn = document.getElementById('closeHistoryBtn');
+        this.imageCount = document.getElementById('imageCount');
+        this.clearAllBtn = document.getElementById('clearAllBtn');
+        this.historyList = document.getElementById('historyList');
+        
         // 모바일 UI 요소들
         this.mobileControls = document.getElementById('mobileControls');
         this.mobileUploadBtn = document.getElementById('mobileUploadBtn');
         this.mobilePasteBtn = document.getElementById('mobilePasteBtn');
+        this.mobileHistoryBtn = document.getElementById('mobileHistoryBtn');
         this.mobileModeBtn = document.getElementById('mobileModeBtn');
         this.mobileGridBtn = document.getElementById('mobileGridBtn');
         this.mobileEffectBtn = document.getElementById('mobileEffectBtn');
@@ -53,6 +62,10 @@ class ImagePixelizer {
         this.originalImage = null;
         this.imageLoaded = false;
         
+        // 이미지 히스토리 관리
+        this.imageHistory = [];
+        this.maxHistorySize = 50; // 최대 저장 이미지 수
+        
         this.init();
     }
     
@@ -61,6 +74,8 @@ class ImagePixelizer {
         this.setupGUI();
         this.resizeCanvas();
         this.showPlaceholder();
+        this.loadImageHistory();
+        this.updateHistoryPanel();
     }
     
     setupEventListeners() {
@@ -80,6 +95,21 @@ class ImagePixelizer {
         // 클립보드 붙여넣기 버튼
         this.pasteBtn.addEventListener('click', () => {
             this.pasteFromClipboard();
+        });
+        
+        // 이미지 목록 버튼
+        this.historyBtn.addEventListener('click', () => {
+            this.showHistoryPanel();
+        });
+        
+        // 이미지 목록 패널 닫기 버튼
+        this.closeHistoryBtn.addEventListener('click', () => {
+            this.hideHistoryPanel();
+        });
+        
+        // 모든 이미지 삭제 버튼
+        this.clearAllBtn.addEventListener('click', () => {
+            this.clearAllImages();
         });
         
         // 전역 클립보드 이벤트 (Ctrl+V, Cmd+V)
@@ -169,6 +199,11 @@ class ImagePixelizer {
         // 모바일 붙여넣기 버튼
         this.mobilePasteBtn.addEventListener('click', () => {
             this.pasteFromClipboard();
+        });
+        
+        // 모바일 이미지 목록 버튼
+        this.mobileHistoryBtn.addEventListener('click', () => {
+            this.showHistoryPanel();
         });
         
         // 모바일 모드 전환 버튼
@@ -490,6 +525,9 @@ class ImagePixelizer {
                 this.resizeCanvas();
                 this.renderImage();
                 this.showMessage('이미지가 성공적으로 로드되었습니다!', 'success');
+                
+                // 이미지를 히스토리에 저장
+                this.saveImageToHistory(e.target.result, file.name);
             };
             img.src = e.target.result;
         };
@@ -528,17 +566,23 @@ class ImagePixelizer {
     }
     
     loadImageFromBlob(blob) {
-        const url = URL.createObjectURL(blob);
-        const img = new Image();
-        img.onload = () => {
-            this.originalImage = img;
-            this.imageLoaded = true;
-            this.resizeCanvas();
-            this.renderImage();
-            URL.revokeObjectURL(url); // 메모리 정리
-            this.showMessage('이미지가 성공적으로 로드되었습니다!', 'success');
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                this.originalImage = img;
+                this.imageLoaded = true;
+                this.resizeCanvas();
+                this.renderImage();
+                this.showMessage('이미지가 성공적으로 로드되었습니다!', 'success');
+                
+                // 이미지를 히스토리에 저장
+                const fileName = 'clipboard_' + new Date().getTime() + '.png';
+                this.saveImageToHistory(e.target.result, fileName);
+            };
+            img.src = e.target.result;
         };
-        img.src = url;
+        reader.readAsDataURL(blob);
     }
     
     showMessage(message, type = 'info') {
@@ -914,6 +958,191 @@ class ImagePixelizer {
         this.downloadLink.href = dataUrl;
         this.downloadLink.download = filename;
         this.downloadLink.click();
+    }
+    
+    // 이미지 히스토리 관리 기능들
+    saveImageToHistory(dataUrl, fileName) {
+        const timestamp = new Date().toISOString();
+        const imageData = {
+            id: 'img_' + Date.now(),
+            dataUrl: dataUrl,
+            fileName: fileName,
+            timestamp: timestamp,
+            displayName: fileName.replace(/\.[^/.]+$/, ''), // 확장자 제거
+            dateString: new Date(timestamp).toLocaleString('ko-KR', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            })
+        };
+        
+        // 히스토리 배열에 추가
+        this.imageHistory.unshift(imageData);
+        
+        // 최대 개수 제한
+        if (this.imageHistory.length > this.maxHistorySize) {
+            this.imageHistory = this.imageHistory.slice(0, this.maxHistorySize);
+        }
+        
+        // 로컬 스토리지에 저장
+        this.saveImageHistoryToStorage();
+        
+        // 히스토리 패널 업데이트
+        this.updateHistoryPanel();
+        
+        this.showMessage(`이미지가 목록에 저장되었습니다.`, 'success');
+    }
+    
+    saveImageHistoryToStorage() {
+        try {
+            localStorage.setItem('imageHistory', JSON.stringify(this.imageHistory));
+        } catch (error) {
+            console.error('로컬 스토리지 저장 오류:', error);
+            this.showMessage('로컬 스토리지에 저장할 수 없습니다.', 'error');
+        }
+    }
+    
+    loadImageHistory() {
+        try {
+            const stored = localStorage.getItem('imageHistory');
+            if (stored) {
+                this.imageHistory = JSON.parse(stored);
+            }
+        } catch (error) {
+            console.error('로컬 스토리지 로드 오류:', error);
+            this.imageHistory = [];
+        }
+    }
+    
+    updateHistoryPanel() {
+        const count = this.imageHistory.length;
+        this.imageCount.textContent = `${count}개의 이미지`;
+        
+        // 목록 초기화
+        this.historyList.innerHTML = '';
+        
+        if (count === 0) {
+            this.historyList.innerHTML = `
+                <div class="empty-history">
+                    <div class="empty-history-icon">📸</div>
+                    <div>저장된 이미지가 없습니다.</div>
+                    <div style="margin-top: 10px; color: #888; font-size: 12px;">
+                        이미지를 업로드하면 자동으로 목록에 저장됩니다.
+                    </div>
+                </div>
+            `;
+            return;
+        }
+        
+        // 이미지 목록 생성
+        this.imageHistory.forEach((imageData, index) => {
+            const itemElement = this.createHistoryItem(imageData, index);
+            this.historyList.appendChild(itemElement);
+        });
+    }
+    
+    createHistoryItem(imageData, index) {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'history-item';
+        
+        itemDiv.innerHTML = `
+            <div class="history-item-header">
+                <h4 class="history-item-name">${imageData.displayName}</h4>
+                <span class="history-item-date">${imageData.dateString}</span>
+            </div>
+            <div class="history-item-preview">
+                <img src="${imageData.dataUrl}" alt="${imageData.displayName}">
+            </div>
+            <div class="history-item-actions">
+                <button class="history-action-btn load-btn" data-index="${index}">불러오기</button>
+                <button class="history-action-btn delete-btn" data-index="${index}">삭제</button>
+            </div>
+        `;
+        
+        // 이벤트 리스너 추가
+        const loadBtn = itemDiv.querySelector('.load-btn');
+        const deleteBtn = itemDiv.querySelector('.delete-btn');
+        const previewImg = itemDiv.querySelector('.history-item-preview img');
+        
+        loadBtn.addEventListener('click', () => {
+            this.loadImageFromHistory(index);
+        });
+        
+        deleteBtn.addEventListener('click', () => {
+            this.deleteImageFromHistory(index);
+        });
+        
+        previewImg.addEventListener('click', () => {
+            this.loadImageFromHistory(index);
+        });
+        
+        return itemDiv;
+    }
+    
+    loadImageFromHistory(index) {
+        if (index < 0 || index >= this.imageHistory.length) {
+            this.showMessage('이미지를 찾을 수 없습니다.', 'error');
+            return;
+        }
+        
+        const imageData = this.imageHistory[index];
+        const img = new Image();
+        
+        img.onload = () => {
+            this.originalImage = img;
+            this.imageLoaded = true;
+            this.resizeCanvas();
+            this.renderImage();
+            this.hideHistoryPanel();
+            this.showMessage(`${imageData.displayName}을(를) 불러왔습니다.`, 'success');
+        };
+        
+        img.onerror = () => {
+            this.showMessage('이미지를 불러올 수 없습니다.', 'error');
+        };
+        
+        img.src = imageData.dataUrl;
+    }
+    
+    deleteImageFromHistory(index) {
+        if (index < 0 || index >= this.imageHistory.length) {
+            this.showMessage('이미지를 찾을 수 없습니다.', 'error');
+            return;
+        }
+        
+        const imageData = this.imageHistory[index];
+        
+        if (confirm(`"${imageData.displayName}"을(를) 삭제하시겠습니까?`)) {
+            this.imageHistory.splice(index, 1);
+            this.saveImageHistoryToStorage();
+            this.updateHistoryPanel();
+            this.showMessage(`${imageData.displayName}이(가) 삭제되었습니다.`, 'success');
+        }
+    }
+    
+    clearAllImages() {
+        if (this.imageHistory.length === 0) {
+            this.showMessage('삭제할 이미지가 없습니다.', 'error');
+            return;
+        }
+        
+        if (confirm(`모든 이미지(${this.imageHistory.length}개)를 삭제하시겠습니까?`)) {
+            this.imageHistory = [];
+            this.saveImageHistoryToStorage();
+            this.updateHistoryPanel();
+            this.showMessage('모든 이미지가 삭제되었습니다.', 'success');
+        }
+    }
+    
+    showHistoryPanel() {
+        this.imageHistoryPanel.classList.add('show');
+        this.updateHistoryPanel();
+    }
+    
+    hideHistoryPanel() {
+        this.imageHistoryPanel.classList.remove('show');
     }
 }
 
